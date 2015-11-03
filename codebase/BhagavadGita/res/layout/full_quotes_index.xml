@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:orientation="vertical"
+    android:id="@+id/backgroundLL" >
+
+    <include layout="@layout/chapter_quote_spinner"
+        android:id="@+id/chapter_quote_header"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ListView
+            android:id="@+id/fqi_ListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="#ff771e1b"
+            android:dividerHeight="1.0px" />
+
+        <TextView
+            android:id="@+id/empty"
+            style="@style/EmptyListText"
+            android:text="@string/no_favourites"/>
+    </RelativeLayout>
+
+</LinearLayout>

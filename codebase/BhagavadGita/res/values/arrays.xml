@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="menu_drawer_options">
+        <item>Continue Reading</item>
+        <item>Chapters</item>
+        <item>Favourites</item>
+        <item>Search</item>
+        <item>Settings</item>
+        <item>QOD</item>
+        <item>Info</item>
+    </string-array>
+
+    <array name="menu_drawer_icons">
+        <item>@drawable/ic_continue_reading</item>
+        <item>@drawable/ic_chapter</item>
+        <item>@drawable/ic_favorite</item>
+        <item>@drawable/ic_search</item>
+        <item>@drawable/ic_settings</item>
+        <item>@drawable/ic_qod</item>
+        <item>@drawable/ic_info</item>
+    </array>
+
+    <string-array name="item_options1">
+        <item>Share</item>
+        <item>Copy</item>
+        <item>Add to Favourite</item>
+        <item>Set QOD</item>
+        <item>Read</item>
+    </string-array>
+    <string-array name="item_options2">
+        <item>Share</item>
+        <item>Copy</item>
+        <item>Remove From Favourite</item>
+        <item>Set QOD</item>
+        <item>Read</item>
+    </string-array>
+
+</resources>

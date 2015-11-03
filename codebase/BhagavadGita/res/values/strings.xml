@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Bhagavad Gita</string>
+    <string name="action_settings">Settings</string>
+    <string name="dialog_share_title">Sharing options</string>
+    <string name="vod">Verse Of The Day</string>
+    <string name="msg_copy">Message copied to clipboard</string>
+    <string name="dialog_font_size_title">Font Size</string>
+    <string name="dialog_bg_img_title">Background image</string>
+    <string name="loading_quotes">Loading Verses...</string>
+    <string name="loading_chapters">Loading Chapters...</string>
+    <string name="share_title">Sharing Verses</string>
+    <string name="add_fav">Added to favourite</string>
+    <string name="remove_fav">Removed from favourite</string>
+    <string name="update_qod">Current verse is set as QOD</string>
+    <string name="font_size">Font Size : </string>
+    <string name="day_night_settings">Day/Night Mode</string>
+    <string name="dialog_OK">OK</string>
+    <string name="search_query_hint">Find Verses</string>
+    <string name="show_sloka">Show Shloka</string>
+    <string name="speak_sloka">Speak Shloka</string>
+    <string name="enable_default_speak">Enable Auto Talk</string>
+    <string name="sloka">Shloka</string>
+    <string name="translation">Translation</string>
+    <string name="copy_title">Copied Verses</string>
+    <string name="no_favourites">No Favorite Verses</string>
+    
+    <string name="no_prev_verse">Reached The Beginning !! No Previous Verses Available.</string>
+    <string name="no_next_verse">Reached The End !! No Next Verses Available.</string>
+    <string name="share_bottom">Shared Via Bhagavad Gita App - Check this out https://play.google.com/store/apps/details?id=com.sunilsahoo.bhagavadgita</string>
+
+</resources>

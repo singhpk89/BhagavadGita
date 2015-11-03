@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qp_main_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    android:clickable="true"
+    android:orientation="vertical" >
+
+    <include
+        android:id="@+id/chapter_quote_header"
+        layout="@layout/chapter_quote_spinner" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/chapter_quote_header"
+        android:layout_above="@+id/grid_pagination_ll" />
+
+    <LinearLayout
+        android:id="@+id/grid_pagination_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
+
+        <TextView
+            android:id="@+id/pageTV1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:drawableTop="@drawable/page_dot"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/pageTV2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:drawableTop="@drawable/page_dot"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/pageTV3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableTop="@drawable/page_dot"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</RelativeLayout>

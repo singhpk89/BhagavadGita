@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4.0dip" >
+
+            <TextView
+                android:id="@+id/fontSizeTitleTV"
+                style="@style/settings"
+                android:text="@string/font_size" />
+
+            <TextView
+                android:id="@+id/fontSizeTV"
+                style="@style/settings" />
+
+            <SeekBar
+                android:id="@+id/fontSizeSB"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
+                android:progressDrawable="@drawable/scrubber_progress"
+                android:thumb="@drawable/scrubber_control" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/day_night_title"
+            style="@style/settings"
+            android:drawableRight="@drawable/day_mode"
+            android:gravity="center_vertical"
+            android:padding="4.0dip"
+            android:text="@string/day_night_settings" />
+
+        <CheckBox
+            android:id="@+id/showSlokaCB"
+            style="@style/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4.0dip"
+            android:text="@string/show_sloka" />
+
+        <CheckBox
+            android:id="@+id/enableTalkCB"
+            style="@style/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4.0dip"
+            android:text="@string/enable_default_speak" />
+
+        <CheckBox
+            android:id="@+id/readSloka"
+            style="@style/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4.0dip"
+            android:text="@string/speak_sloka" />
+    </LinearLayout>
+
+</ScrollView>
