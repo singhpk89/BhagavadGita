@@ -104,8 +104,95 @@ public class GitaDBOperation {
         }
         return salesCount;
     }
+    
+    /**
+     * GET QUOTE COUNT
+     * 
+     * @return
+     */
+    public static int getTotalNoChapters(Context context) {
 
-    public static int getChapterCount(Context context) {
+        Cursor cursor = null;
+        int salesCount = 0;
+        try {
+            cursor = context.getContentResolver().query(
+                    ChaptersTable.CONTENT_URI,
+                    new String[] { "count(*) AS count" }, null, null, null);
+            cursor.moveToFirst();
+            salesCount = cursor.getInt(0);
+        } catch (Exception ex) {
+            Log.e(TAG, "Error in getting sales count :" + ex.getMessage());
+        } finally {
+            if (cursor != null) {
+                try {
+                    cursor.close();
+                } catch (Exception ex) {
+                }
+            }
+            cursor = null;
+        }
+        return salesCount;
+    }
+    
+    
+    /**
+     * GET QUOTE COUNT
+     * 
+     * @return
+     */
+    public static String getLastQuoteTextChapter(Context context, int chapterNo) {
+
+        Cursor cursor = null;
+        String quotesText = "";
+        try {
+            String selection = QuotesTable.CHAPTER_NO+"="+chapterNo;
+            cursor = context.getContentResolver().query(
+                    QuotesTable.CONTENT_URI,
+                    null, selection, null, null);
+            cursor.moveToLast();
+            quotesText = cursor.getString(cursor.getColumnIndex(QuotesTable.TEXT_NO));
+        } catch (Exception ex) {
+            Log.e(TAG, "Error in getting sales count :" + ex.getMessage());
+        } finally {
+            if (cursor != null) {
+                try {
+                    cursor.close();
+                } catch (Exception ex) {
+                }
+            }
+            cursor = null;
+        }
+        return quotesText;
+    }
+    
+    
+    public static Quote getFirstQuoteOfChapter(Context context, int chapterNo) {
+
+        Cursor cursor = null;
+        Quote entity = null;
+        try {
+            String selection = QuotesTable.CHAPTER_NO+"="+chapterNo;
+            cursor = context.getContentResolver().query(
+                    QuotesTable.CONTENT_URI,
+                    null, selection, null, null);
+            cursor.moveToFirst();
+            entity = retrieveQuote(cursor);
+        } catch (Exception ex) {
+            Log.e(TAG, "Error in getting sales count :" + ex.getMessage());
+        } finally {
+            if (cursor != null) {
+                try {
+                    cursor.close();
+                } catch (Exception ex) {
+                }
+            }
+            cursor = null;
+        }
+        return entity;
+    }
+    
+    
+     public static int getChapterCount(Context context) {
 
         Cursor cursor = null;
         int salesCount = 0;

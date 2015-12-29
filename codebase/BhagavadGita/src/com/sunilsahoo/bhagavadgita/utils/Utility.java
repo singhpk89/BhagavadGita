@@ -1,5 +1,7 @@
 package com.sunilsahoo.bhagavadgita.utils;
 
+import java.util.Calendar;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -27,7 +29,7 @@ public class Utility {
         quoteDetail.setArguments(bundle);
         FragmentManager fragmentManager = activity.getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction()
-                .add(R.id.frame_container, quoteDetail, name);
+                .replace(R.id.frame_container, quoteDetail, name);
         transaction.addToBackStack(name);
         transaction.commit();
     }
@@ -42,7 +44,7 @@ public class Utility {
         quoteDetail.setArguments(bundle);
         FragmentManager fragmentManager = activity.getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction()
-                .add(R.id.frame_container, quoteDetail, name);
+                .replace(R.id.frame_container, quoteDetail, name);
         transaction.addToBackStack(name);
         transaction.commit();
     }
@@ -60,35 +62,36 @@ public class Utility {
     }
     
     public static boolean updateChapterId(Context context, int chapterId){
-        if(chapterId != PreferenceUtils.getSelectedChapter(context)){
-        PreferenceUtils.setSelectedChapter(context, chapterId);
-        PreferenceUtils.resetSelectedQuoteText(context);
+        int previousSelectedChapter = GitaDBOperation.getQuoteById(PreferenceUtils.getSelectedQuoteId(context), context).getChapterNo();
+        if(chapterId != previousSelectedChapter){
+        PreferenceUtils.setSelectedQuoteId(context, GitaDBOperation.getFirstQuoteOfChapter(context, chapterId).getId());
         return true;
         }
         return false;
     }
     
     public static void updateBackgroundImage(ViewGroup group, Context context){
-        if(group == null){
+        /*if(group == null){
             return;
         }
         int bgResId = PreferenceUtils.getDayMode(context) ? R.drawable.background : R.drawable.background_black;
-        group.setBackgroundResource(bgResId);
+        group.setBackgroundResource(bgResId);*/
+        //TODO
     }
     
     public static void setTextColor(TextView textView, Context context){
-        if(textView == null){
+        /*if(textView == null){
             return;
         }
         int colorId = PreferenceUtils.getDayMode(context) ? R.color.text_black : R.color.text_white; 
-        textView.setTextColor(context.getResources().getColor(colorId));
+        textView.setTextColor(context.getResources().getColor(colorId));*/
     }
     
     public static int getQODID(Context context){
         long time = PreferenceUtils.getQODTime(context);
         long currentTime = System.currentTimeMillis();
-        boolean timeElapsed = Math.abs(currentTime-time) > 24*60*60*1000;
-        if(timeElapsed){
+        boolean isSameDay = isSameDay(time, currentTime);
+        if(!isSameDay){
             int total = PreferenceUtils.getTotalNoOfQuotes(context);
             if (total == 0) {
                 total = GitaDBOperation.getTotalQuotesNoFilter(context);
@@ -100,5 +103,14 @@ public class Utility {
         return PreferenceUtils.getQODID(context);
         
             
+    }
+    
+    private static boolean isSameDay(long time1, long time2){
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        cal1.setTimeInMillis(time1);
+        cal2.setTimeInMillis(time2);
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                          cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 }

@@ -5,16 +5,18 @@ package com.sunilsahoo.bhagavadgita.view;
 
 import java.util.ArrayList;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,6 +24,7 @@ import com.sunilsahoo.bhagavadgita.GitaFragment;
 import com.sunilsahoo.bhagavadgita.OnFragmentResult;
 import com.sunilsahoo.bhagavadgita.OnItemSelectionListener;
 import com.sunilsahoo.bhagavadgita.R;
+import com.sunilsahoo.bhagavadgita.activity.BhagavadGitaMainActivity;
 import com.sunilsahoo.bhagavadgita.adapter.QuoteAdapter;
 import com.sunilsahoo.bhagavadgita.adapter.QuoteAdapter.OnClickCheckBoxListener;
 import com.sunilsahoo.bhagavadgita.beans.Chapter;
@@ -47,14 +50,20 @@ public class QuotesListFragment extends GitaFragment implements
     private TextView tv_empty;
     private QuoteAdapter adapter;
     private ArrayList<Item> listData;
-    private ProgressDialog dialogLoading;
+    private static ProgressDialog dialogLoading;
     private Context mContext;
     private View rootView = null;
     private String fragmentType = Constants.FRAG_QUOTES_LIST;
-    private View mChapterQuoteHeader = null;
-    private ChapterQuoteSpinnerView chapterQuoteSpinnerView = new ChapterQuoteSpinnerView();
-    private LinearLayout mainContainerLL = null;
+    private SwipeRefreshLayout pullToRefresh = null;
+//    private View mChapterQuoteHeader = null;
+//    private LinearLayout mainContainerLL = null;
     private OnFragmentResult onFragmentResult = null;
+    
+    @Override
+    public void onAttach(Activity activity) {
+        mContext = activity;
+        super.onAttach(activity);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -70,25 +79,31 @@ public class QuotesListFragment extends GitaFragment implements
     void initView(View rootView) {
         Log.d(TAG, "inside initView");
         mContext = getActivity();
-        mainContainerLL = (LinearLayout) rootView
-                .findViewById(R.id.backgroundLL);
         fragmentType = getArguments().getString(Constants.FRAG_TYPE);
-        mChapterQuoteHeader = rootView.findViewById(R.id.chapter_quote_header);
-        if (Utility.isChapterFragment(fragmentType)
-                || Constants.FRAG_FAVOURITE.equals(fragmentType)) {
-
-            mChapterQuoteHeader.setVisibility(View.GONE);
-        } else {
-            chapterQuoteSpinnerView.initialize(getActivity(), rootView, this);
-        }
-        chapterQuoteSpinnerView.setVisibilityOfMenuOptions(View.INVISIBLE);
-
         lv = (ListView) rootView.findViewById(R.id.fqi_ListView);
+//        mChapterQuoteHeader = rootView.findViewById(R.id.chapter_quote_header);
+        if (Constants.FRAG_FAVOURITE.equals(fragmentType)) {
+            lv.setDividerHeight(0);
+//            mChapterQuoteHeader.setVisibility(View.GONE);
+            //TODO
+        } else {
+//            chapterQuoteSpinnerView.initialize(getActivity(), rootView, this);
+        }
+        ((BhagavadGitaMainActivity)mContext).setVisibilityOfMenuOptions(View.INVISIBLE);
+
+        
 
         tv_empty = (TextView) rootView.findViewById(R.id.empty);
 
         listData = new ArrayList<Item>();
-        Utility.updateBackgroundImage(mainContainerLL, getActivity());
+        pullToRefresh = (SwipeRefreshLayout) rootView.findViewById(R.id.pullToRefresh);
+        pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                refreshContent();
+            }
+        });
 
         lv.setOnItemClickListener(new OnItemClickListener() {
 
@@ -98,7 +113,7 @@ public class QuotesListFragment extends GitaFragment implements
                 if (Utility.isChapterFragment(fragmentType)) {
                     int selectedChapterId = ((Chapter) listData.get(pos))
                             .getId();
-                    Utility.updateChapterId(getActivity(), selectedChapterId);
+                    Utility.updateChapterId(mContext, selectedChapterId);
                     Utility.launchQuotesListFragment(null,
                             Constants.FRAG_CHAPTER_QUOTE_LIST, getActivity());
                 } else {
@@ -108,8 +123,9 @@ public class QuotesListFragment extends GitaFragment implements
 
                     Quote selectedQuote = (Quote) listData.get(pos);
                     if (!Constants.FRAG_FAVOURITE.equals(fragmentType)) {
-                        chapterQuoteSpinnerView.setQuoteSelection(selectedQuote
-                                .getTextId());
+//                        chapterQuoteSpinnerView.setQuoteSelection(selectedQuote
+//                                .getTextId());
+                        //TODO
                     }
                     Bundle bundle = new Bundle();
 
@@ -140,6 +156,15 @@ public class QuotesListFragment extends GitaFragment implements
 
     }
 
+    private void refreshContent(){ 
+
+        new Handler().postDelayed(new Runnable() {
+               @Override public void run() {
+                   pullToRefresh.setRefreshing(false);
+               }
+           }, 0);
+
+    }
     /**
      * get data task
      * 
@@ -154,15 +179,18 @@ public class QuotesListFragment extends GitaFragment implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            if(!isAdded()){
+                return;
+            }
             int dialogVal = Utility.isChapterFragment(fragmentType) ? R.string.loading_chapters
                     : R.string.loading_quotes;
 
             if (null == dialogLoading) {
-                dialogLoading = DialogLoading.Loading(getActivity(),
+                dialogLoading = DialogLoading.Loading(mContext,
                         getResources().getString(dialogVal));
                 dialogLoading.show();
             } else if (!dialogLoading.isShowing()) {
-                dialogLoading = DialogLoading.Loading(getActivity(),
+                dialogLoading = DialogLoading.Loading(mContext,
                         getResources().getString(dialogVal));
                 dialogLoading.show();
             }
@@ -171,10 +199,13 @@ public class QuotesListFragment extends GitaFragment implements
 
         @Override
         protected Object doInBackground(Object... params) {
+            if(!isAdded()){
+                return null;
+            }
             if (Constants.FRAG_CHAPTERS_LIST.equals(fragmentType)) {
                 listData = GitaDBOperation.getChapters(mContext);
             } else if (Constants.FRAG_CHAPTER_QUOTE_LIST.equals(fragmentType)) {
-                int chapterNo = PreferenceUtils.getSelectedChapter(mContext);
+                int chapterNo = GitaDBOperation.getQuoteById(PreferenceUtils.getSelectedQuoteId(mContext), mContext).getChapterNo();
                 listData = GitaDBOperation.getItemsOf(chapterNo, mContext);
             } else if (Constants.FRAG_FAVOURITE.equals(fragmentType)) {
                 listData = GitaDBOperation.getQuoteByFav(mContext);
@@ -186,13 +217,17 @@ public class QuotesListFragment extends GitaFragment implements
         @Override
         protected void onPostExecute(Object result) {
            Log.d(TAG, "list data count :"+listData.size());
+           if(!isAdded()){
+               return;
+           }
             if (adapter == null) {
                 // if(tv_empty)
                 if ((listData == null) || listData.isEmpty()) {
                     if (Constants.FRAG_FAVOURITE.equals(fragmentType)) {
-                        if (mChapterQuoteHeader != null) {
-                            mChapterQuoteHeader.setVisibility(View.GONE);
-                        }
+//                        if (mChapterQuoteHeader != null) {
+//                            mChapterQuoteHeader.setVisibility(View.GONE);
+//                        }
+                        //TODO
                         updateEmptyTextView();
                     }
                 }
@@ -231,24 +266,26 @@ public class QuotesListFragment extends GitaFragment implements
             // lv.setSelection(currentPostion);
             Log.d(TAG, "fragType :" + fragmentType + " isChapterFragment :"
                     + Utility.isChapterFragment(fragmentType) + " from pref :"
-                    + PreferenceUtils.getSelectedQuoteText(getActivity()));
+                    + PreferenceUtils.getSelectedQuoteId(mContext));
             if (!Utility.isChapterFragment(fragmentType)
                     && !Constants.FRAG_FAVOURITE.equals(fragmentType)) {
-                int selectedPosition = getPosition(chapterQuoteSpinnerView
-                        .getQuoteSpinner().getSelectedItem().toString());
-                lv.setSelection(selectedPosition);
+//                int selectedPosition = getPosition(chapterQuoteSpinnerView
+//                        .getQuoteSpinner().getSelectedItem().toString());
+//                lv.setSelection(selectedPosition);
+                //TODO
 
             }
             if (dialogLoading.isShowing()) {
                 dialogLoading.dismiss();
+                dialogLoading = null;
             }
 
             super.onPostExecute(result);
         }
     }
 
-    private int getPosition(String quoteText) {
-        int selectedChapter = (PreferenceUtils.getSelectedChapter(mContext));
+    /*private int getPosition(String quoteText) {
+        int selectedChapter = (GitaDBOperation.getQuoteById(PreferenceUtils.getSelectedQuoteId(getActivity()), getActivity()).getChapterNo());
         for (int i = 0; i < listData.size(); i++) {
             if (listData.get(i) instanceof Quote) {
                 if (matchQuote(quoteText, selectedChapter,
@@ -258,16 +295,16 @@ public class QuotesListFragment extends GitaFragment implements
             }
         }
         return 0;
-    }
+    }*/
 
-    private boolean matchQuote(String quoteText, int chapterId, Quote quote) {
+    /*private boolean matchQuote(String quoteText, int chapterId, Quote quote) {
         if (chapterId == Constants.EOF) {
             return quoteText.equals(String.valueOf(quote.getId()));
         } else if (quote.getChapterNo() == chapterId) {
             return quoteText.equals(quote.getTextId());
         }
         return false;
-    }
+    }*/
 
     @Override
     public void onItemSelected() {
@@ -283,12 +320,7 @@ public class QuotesListFragment extends GitaFragment implements
                 adapter.notifyDataSetChanged();
             }
             break;
-        case Constants.SettingsItem.READ_MODE:
-            Utility.updateBackgroundImage(mainContainerLL, getActivity());
-            if (adapter != null) {
-                adapter.notifyDataSetChanged();
-            }
-            break;
+
         default:
             Log.d(TAG, "item Type unknown");
             break;
@@ -320,7 +352,8 @@ public class QuotesListFragment extends GitaFragment implements
                 }
             }
             if (listData.isEmpty()) {
-                mChapterQuoteHeader.setVisibility(View.GONE);
+//                mChapterQuoteHeader.setVisibility(View.GONE);
+                //TODO
                 updateEmptyTextView();
             }
             adapter.notifyDataSetChanged();
@@ -339,7 +372,7 @@ public class QuotesListFragment extends GitaFragment implements
 
     @Override
     public void onFragmentCallback(int action, Bundle bundle) {
-        if (action == Constants.FragmentCallbackAction.UPDATE_UI) {
+        /*if (action == Constants.FragmentCallbackAction.UPDATE_UI) {
             if (bundle == null) {
                 return;
             }
@@ -357,6 +390,16 @@ public class QuotesListFragment extends GitaFragment implements
                 chapterQuoteSpinnerView.setQuoteSelection(selectedQuote);
             }
             new GetQuoteData().execute();
+        }*/
+        //TODO
+    }
+    
+    @Override
+    public void onDestroyView() {
+        if(dialogLoading != null){
+            dialogLoading.dismiss();
+            dialogLoading = null;
         }
+        super.onDestroyView();
     }
 }

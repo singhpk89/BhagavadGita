@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.sunilsahoo.bhagavadgita.GitaFragment;
 import com.sunilsahoo.bhagavadgita.R;
+import com.sunilsahoo.bhagavadgita.activity.BhagavadGitaMainActivity;
 import com.sunilsahoo.bhagavadgita.adapter.QuoteAdapter;
 import com.sunilsahoo.bhagavadgita.adapter.QuoteAdapter.OnClickCheckBoxListener;
 import com.sunilsahoo.bhagavadgita.beans.Chapter;
@@ -46,10 +47,10 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
     private TextView tv_empty;
     private QuoteAdapter adapter;
     private ArrayList<Item> listData;
-    private ProgressDialog dialogLoading;
+    private static ProgressDialog dialogLoading;
     private Context mContext;
     private View rootView = null;
-    private String fragmentType = Constants.FRAG_QUOTES_LIST;
+    private String fragmentType = Constants.FRAG_SEARCH_QUOTES_LIST;
     private SearchView searchView = null;
     private static String mMatchText = null;
     private GetQuoteData mGetQuoteData = null;
@@ -85,13 +86,7 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
             @Override
             public void onItemClick(AdapterView<?> arg0, View v, int pos,
                     long id) {
-                if (Utility.isChapterFragment(fragmentType)) {
-                    int selectedChapterId = ((Chapter) listData.get(pos))
-                            .getId();
-                    Utility.updateChapterId(getActivity(), selectedChapterId);
-                    Utility.launchQuotesListFragment(null,
-                            Constants.FRAG_QUOTES_LIST, getActivity());
-                } else {
+
                     if (listData.get(pos) instanceof Chapter) {
                         return;
                     }
@@ -103,7 +98,6 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
                     Utility.launchQuoteDetailFragment(bundle,
                             Constants.FRAG_SEARCH_QUOTE_DETAIL, getActivity());
                 }
-            }
         });
         
         new GetQuoteData().execute();
@@ -124,6 +118,9 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            if(!isAdded()){
+                return;
+            }
             int dialogVal = Utility.isChapterFragment(fragmentType) ? R.string.loading_chapters
                     : R.string.loading_quotes;
 
@@ -141,6 +138,9 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
 
         @Override
         protected Object doInBackground(Object... params) {
+            if(!isAdded()){
+                return null;
+            }
             if (Utility.isChapterFragment(fragmentType)) {
                 listData = GitaDBOperation.getChapters(mContext);
             } else {
@@ -152,6 +152,10 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
         @Override
         protected void onPostExecute(Object result) {
 
+            if(!isAdded()){
+                return;
+            }
+            
             if (adapter == null) {
                 adapter = new QuoteAdapter(mContext, fragmentType, listData);
                 adapter.setOnClickCheckBoxListener(new OnClickCheckBoxListener() {
@@ -187,6 +191,7 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
             // lv.setSelection(currentPostion);
             if (dialogLoading.isShowing()) {
                 dialogLoading.dismiss();
+                dialogLoading = null;
             }
 
             super.onPostExecute(result);
@@ -284,6 +289,30 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
     }
     public static String getMatchText(){
         return mMatchText;
+    }
+    
+    @Override
+    public void onResume() {
+        setTitle();
+        super.onResume();
+    }
+    
+    private void setTitle(){
+        try{
+        String[] navMenuTitles = getResources().getStringArray(
+                R.array.menu_drawer_options);
+        String title = navMenuTitles[Constants.SlidingMenuItems.SEARCH];
+        ((BhagavadGitaMainActivity) getActivity()).setActionBarTitle(title);
+        }catch(Exception ex){}
+    }
+    
+    @Override
+    public void onDestroyView() {
+        if(dialogLoading != null){
+            dialogLoading.dismiss();
+            dialogLoading = null;
+        }
+        super.onDestroyView();
     }
 
 }

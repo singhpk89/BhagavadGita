@@ -2,8 +2,10 @@ package com.sunilsahoo.bhagavadgita.activity;
 
 import java.util.ArrayList;
 
+import android.app.ActionBar;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
@@ -13,13 +15,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sunilsahoo.bhagavadgita.GitaFragment;
@@ -58,6 +63,12 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
 
     private ArrayList<NavDrawerItem> navDrawerItems;
     private NavDrawerListAdapter adapter;
+    private ImageButton moreIB = null;
+    private ImageButton shareIB = null;
+    private View mCustomView = null;
+    private LayoutInflater mInflater = null;
+    private TextView mTitleTextView = null;
+    private String prevTitle = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +77,9 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
+        mInflater = LayoutInflater.from(this);
+        ColorDrawable cd = new ColorDrawable(getResources().getColor(R.color.bgStartColor));
+        getActionBar().setBackgroundDrawable(cd);
         mTitle = mDrawerTitle = getTitle();
 
         // load slide menu items
@@ -128,24 +142,30 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
         mDrawerList.setAdapter(adapter);
 
         // enabling action bar app icon and behaving it as toggle button
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        initializeMoreBtn(getActionBar());
+//        getActionBar().setDisplayHomeAsUpEnabled(true);
+//        getActionBar().setHomeButtonEnabled(true);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.drawable.ic_drawer, // nav menu toggle icon
+                R.drawable.action_drawer, // nav menu toggle icon
                 R.string.app_name, // nav drawer open - description for
                                    // accessibility
                 R.string.app_name // nav drawer close - description for
                                   // accessibility
         ) {
             public void onDrawerClosed(View view) {
-                getActionBar().setTitle(mTitle);
+                if(mTitle.equals(getResources().getString(R.string.app_name))){
+                    setActionBarTitle(prevTitle);
+                }else{
+                    setActionBarTitle(mTitle);
+                }
                 // calling onPrepareOptionsMenu() to show action bar icons
                 invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
-                getActionBar().setTitle(mDrawerTitle);
+                Log.d(TAG, "title :"+getTitle().toString()+" set to :"+mDrawerTitle);
+                setActionBarTitle(mDrawerTitle);
                 // calling onPrepareOptionsMenu() to hide action bar icons
                 invalidateOptionsMenu();
             }
@@ -155,6 +175,11 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
         if (savedInstanceState == null) {
             // on first time display view for first nav item
             displayView(0);
+        }
+        
+        if(PreferenceUtils.isFirstTimeLaunch(this)){
+            displayView(Constants.SlidingMenuItems.INFO);
+            PreferenceUtils.updateFirstTimeLaunch(this);
         }
     }
 
@@ -195,6 +220,15 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
         }
     }
 
+    private void clearFragments(FragmentManager fragmentManager){
+        try{
+        for(int i = 0; i < fragmentManager.getBackStackEntryCount(); ++i) {    
+            fragmentManager.popBackStack();
+        }
+        }catch(Exception ex){
+            
+        }
+    }
     /**
      * Diplaying fragment view for selected nav drawer list item
      * 
@@ -283,13 +317,14 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
                 ((DialogFragment) fragment).show(fragmentManager,
                         Constants.FRAG_SETTINGS);
             } else {
+                clearFragments(fragmentManager);
                 if (fragmentType != null) {
                     transaction.replace(R.id.frame_container, fragment,
                             fragmentType).commit();
                 } else {
                     Log.e(TAG, "Invalid fragment type ");
                 }
-                setTitle(navMenuTitles[position]);
+                setActionBarTitle(navMenuTitles[position]);
             }
 
             // update selected item and title, then close the drawer
@@ -304,12 +339,15 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
         }
     }
 
-    @Override
-    public void setTitle(CharSequence title) {
+    public void setActionBarTitle(CharSequence title) {
+        if(!title.equals(getResources().getString(R.string.app_name))){
+            prevTitle = title.toString();
+        }
         mTitle = title;
-        getActionBar().setTitle(mTitle);
+        mTitleTextView.setText(mTitle);
+//        getActionBar().setActionBarTitle(mTitle);
     }
-
+    
     /**
      * When using the ActionBarDrawerToggle, you must call it during
      * onPostCreate() and onConfigurationChanged()...
@@ -349,5 +387,51 @@ public class BhagavadGitaMainActivity extends FragmentActivity implements
     private boolean isDialogFragment(Fragment frag) {
         return (frag != null) && (frag instanceof DialogFragment);
     }
+    
+    private void initializeMoreBtn(ActionBar actionBar){
+        actionBar.setDisplayShowHomeEnabled(false);
+        actionBar.setDisplayShowTitleEnabled(false);
+        mCustomView = mInflater.inflate(R.layout.custom_action_bar, null);
+        mTitleTextView = (TextView) mCustomView.findViewById(R.id.title_text);
+
+        moreIB = (ImageButton) mCustomView
+                .findViewById(R.id.imageButton);
+        shareIB = (ImageButton) mCustomView
+                .findViewById(R.id.shareIB);
+        
+        actionBar.setDisplayOptions(actionBar.getDisplayOptions()
+                | ActionBar.DISPLAY_SHOW_CUSTOM);
+        actionBar.setCustomView(mCustomView);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        
+        
+    }
+    
+    public void setVisibilityOfMenuOptions(int visibility) {
+        if (moreIB != null) {
+            moreIB.setVisibility(visibility);
+        }
+        if(shareIB != null) {
+            shareIB.setVisibility(visibility);
+        }
+    }
+    public ImageButton getFavouriteBtn(){
+        return moreIB;
+    }
+    
+    public ImageButton getShareBtn(){
+        return shareIB;
+    }
+    
+    /*@Override
+    protected void onResume() {
+        if(PreferenceUtils.isFirstTimeLaunch(this)){
+            displayView(Constants.SlidingMenuItems.INFO);
+            PreferenceUtils.updateFirstTimeLaunch(this);
+        }
+        
+        super.onResume();
+    }*/
 
 }

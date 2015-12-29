@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/backgroundLL"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/background"
-    android:orientation="vertical"
-    android:id="@+id/backgroundLL" >
+    android:layout_height="match_parent" >
 
-    <include layout="@layout/chapter_quote_spinner"
-        android:id="@+id/chapter_quote_header"/>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/pullToRefresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp" >
 
         <ListView
             android:id="@+id/fqi_ListView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:divider="#ff771e1b"
-            android:dividerHeight="1.0px" />
+            android:layout_height="match_parent"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/rounded_background"
+            android:divider="@drawable/list_divider"
+            android:dividerHeight="1dp"
+            android:fadingEdgeLength="0dp" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
-        <TextView
-            android:id="@+id/empty"
-            style="@style/EmptyListText"
-            android:text="@string/no_favourites"/>
-    </RelativeLayout>
+    <TextView
+        android:id="@+id/empty"
+        style="@style/EmptyListText"
+        android:text="@string/no_favourites" />
 
-</LinearLayout>
+</RelativeLayout>

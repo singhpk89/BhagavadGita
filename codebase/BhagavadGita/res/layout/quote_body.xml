@@ -1,9 +1,20 @@
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/slokaIndex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/grey" />
+
+    <ScrollView
         android:id="@+id/qp_body_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/chapter_quote_header"
+        android:layout_above="@+id/slokaIndex"
         android:clickable="true"
         android:fillViewport="true" >
 
@@ -12,37 +23,50 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clickable="true"
-            android:orientation="vertical">
+            android:orientation="vertical" >
 
             <TextView
                 android:id="@+id/slokaTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                style="@style/QuoteViewHeader"
                 android:gravity="center"
-                android:padding="5.0dip"
-                android:textColor="#ffffff"
-                android:background="@color/section_header"
-                android:text="@string/sloka"
-                android:textStyle="bold" />
+                android:text="@string/sloka"/>
+
             <TextView
                 android:id="@+id/sloka"
-                style="@style/QuoteViewText"
-                android:textColor="#000000" />
+                style="@style/QuoteViewText" />
             
+            <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/playPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5.0dip"
+                android:src="@drawable/play" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginLeft="5dp"
+                android:background="#E6E7E7"
+                android:layout_gravity="center_vertical" />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/translationTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                style="@style/QuoteViewHeader"
                 android:gravity="center"
-                android:padding="5.0dip"
-                android:textColor="#ffffff"
-                android:background="@color/section_header"
-                android:text="@string/translation"
-                android:textStyle="bold" />
-            
+                android:text="@string/translation"/>
+
             <TextView
                 android:id="@+id/qp_body"
-                style="@style/QuoteViewText"
-                android:textColor="#000000" />
+                style="@style/QuoteViewText" />
         </LinearLayout>
     </ScrollView>
+
+</RelativeLayout>

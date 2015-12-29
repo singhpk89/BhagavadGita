@@ -27,6 +27,7 @@ public class Constants {
     public static final String FRAG_SETTINGS = "fragSettings";
     public static final String FRAG_DETAIL_HOME = "fragHome";
     public static final String FRAG_QUOTES_LIST = "fragQuoteList";
+    public static final String FRAG_SEARCH_QUOTES_LIST = "fragSearchQuoteList";
     public static final String FRAG_SEARCH = "fragSearch";
     public static final String FRAG_QOD = "fragQOD";
     public static final String FRAG_CHAPTERS_LIST = "fragChapterList";

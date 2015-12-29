@@ -3,23 +3,20 @@
     android:id="@+id/qp_main_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
     android:clickable="true"
     android:orientation="vertical" >
-
-    <include
-        android:id="@+id/chapter_quote_header"
-        layout="@layout/chapter_quote_spinner" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/chapter_quote_header"
-        android:layout_above="@+id/grid_pagination_ll" />
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/footer"
+        android:background="@drawable/rounded_background" />
 
+    
     <LinearLayout
-        android:id="@+id/grid_pagination_ll"
+        android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -28,27 +25,31 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp" >
 
-        <TextView
-            android:id="@+id/pageTV1"
+        <ImageView
+            android:id="@+id/chapterPrev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:drawableTop="@drawable/page_dot"
-            android:textSize="14sp" />
-        <TextView
-            android:id="@+id/pageTV2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="5dp"
-            android:drawableTop="@drawable/page_dot"
-            android:textSize="14sp" />
+            android:layout_marginRight="30dp"
+            android:src="@drawable/prev_chapter" />
 
-        <TextView
-            android:id="@+id/pageTV3"
+        <ImageView
+            android:id="@+id/quotePrev"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableTop="@drawable/page_dot"
-            android:textSize="14sp" />
+            android:layout_marginRight="30dp"
+            android:src="@drawable/prev_quote" />
+
+        <ImageView
+            android:id="@+id/quoteNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:src="@drawable/next_quote" />
+        <ImageView
+            android:id="@+id/chapterNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/next_chapter" />
     </LinearLayout>
 
 </RelativeLayout>

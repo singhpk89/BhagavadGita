@@ -21,6 +21,7 @@ import com.sunilsahoo.bhagavadgita.beans.Chapter;
 import com.sunilsahoo.bhagavadgita.beans.Item;
 import com.sunilsahoo.bhagavadgita.beans.Quote;
 import com.sunilsahoo.bhagavadgita.db.PreferenceUtils;
+import com.sunilsahoo.bhagavadgita.utils.Constants;
 import com.sunilsahoo.bhagavadgita.utils.Utility;
 
 /**
@@ -31,7 +32,6 @@ public class QuoteAdapter extends BaseAdapter {
 
     private ArrayList<Item> data;
     private LayoutInflater l_Inflater;
-    private boolean isExpand = false;
     private String fragmentType = null;
     private Context context = null;
 
@@ -78,6 +78,9 @@ public class QuoteAdapter extends BaseAdapter {
                 quoteTV = (TextView) convertView.findViewById(R.id.qi_content);
                 Utility.setTextColor(quoteTV, context);
                 favCB = (CheckBox) convertView.findViewById(R.id.qi_fav_cbx);
+                if (Constants.FRAG_FAVOURITE.equals(fragmentType) || (Constants.FRAG_SEARCH_QUOTES_LIST.equals(fragmentType))) {
+                    convertView.findViewById(R.id.quote_container).setBackgroundResource(R.drawable.text_bg);
+                }
             } else {
                 convertView = l_Inflater.inflate(R.layout.section_header, null);
                 quoteTV = (TextView) convertView.findViewById(R.id.chapter);
@@ -112,12 +115,9 @@ public class QuoteAdapter extends BaseAdapter {
             
             quoteTV.setText(chapter.getId()<= 0 ? chapter.getTitle() :chapter.getId() + " : " + chapter.getTitle());
         }
-        if (!this.isExpand && !Utility.isChapterFragment(fragmentType)) {
+        if (!Utility.isChapterFragment(fragmentType)) {
             quoteTV.setMaxLines(2);
             quoteTV.setEllipsize(TruncateAt.END);
-        } else {
-            quoteTV.setMaxLines(30);
-            quoteTV.setEllipsize(null);
         }
 
         return convertView;
@@ -129,21 +129,6 @@ public class QuoteAdapter extends BaseAdapter {
      */
     public void setData(ArrayList<Item> data) {
         this.data = data;
-    }
-
-    /**
-     * @param isExpand
-     *            the isExpand to set
-     */
-    public void setExpand(boolean isExpand) {
-        this.isExpand = isExpand;
-    }
-
-    /**
-     * @return the isExpand
-     */
-    public boolean isExpand() {
-        return isExpand;
     }
 
     /*

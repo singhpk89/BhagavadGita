@@ -14,13 +14,11 @@ public class PreferenceUtils {
     private static final String SHOW_SLOKA = "show_sloka";
     private static final String READ_SLOKA = "read_sloka";
     private static final String SHOW_NOTICE = "showNotice";
-    private static final String KEY_QUOTE_FONT_COLOR = "quote_font_color";
     private static final String KEY_FONT_SIZE = "quote_font_size";
     private static final int KEY_FONT_SIZE_DEFAULT = 15;
     private static final String DB_VERSION = "db_version";
-    private static final String SELECTED_CHAPTER = "sel_ch";
-    private static final String SELECTED_QUOTE_TEXT = "sel_quote_text";
-    private static final String SELECTED_QUOTE_TEXT_DEFAULT = "1";
+    private static final String SELECTED_QUOTE_ID = "sel_quote_id";
+    private static final int SELECTED_QUOTE_TEXT_DEFAULT = 1;
     private static final String QOD = "qod";
     private static final String QOD_TIME = "qod_time";
     private static final String LAST_READ_QUOTE = "last_read_quote";
@@ -39,40 +37,17 @@ public class PreferenceUtils {
         prefEditor.commit();
     }
     
-    public static String getSelectedQuoteText(Context context) {
+    public static int getSelectedQuoteId(Context context) {
         SharedPreferences pref = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        return pref.getString(SELECTED_QUOTE_TEXT, SELECTED_QUOTE_TEXT_DEFAULT);
+        return pref.getInt(SELECTED_QUOTE_ID, SELECTED_QUOTE_TEXT_DEFAULT);
     }
 
-    public static void setSelectedQuoteText(Context context, String quoteText) {
+    public static void setSelectedQuoteId(Context context, int quoteId) {
         SharedPreferences pref = PreferenceManager
                 .getDefaultSharedPreferences(context);
         Editor prefEditor = pref.edit();
-        prefEditor.putString(SELECTED_QUOTE_TEXT, quoteText);
-        prefEditor.commit();
-    }
-    
-    public static void resetSelectedQuoteText(Context context) {
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(context);
-        Editor prefEditor = pref.edit();
-        prefEditor.putString(SELECTED_QUOTE_TEXT, SELECTED_QUOTE_TEXT_DEFAULT);
-        prefEditor.commit();
-    }
-    
-    
-    public static int getSelectedChapter(Context context) {
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(context);
-        return pref.getInt(SELECTED_CHAPTER, 0);
-    }
-
-    public static void setSelectedChapter(Context context, int chapter) {
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(context);
-        Editor prefEditor = pref.edit();
-        prefEditor.putInt(SELECTED_CHAPTER, chapter);
+        prefEditor.putInt(SELECTED_QUOTE_ID, quoteId);
         prefEditor.commit();
     }
     
@@ -121,7 +96,7 @@ public class PreferenceUtils {
     public static boolean enableTalk(Context context) {
         SharedPreferences pref = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        return pref.getBoolean(ENABLE_TALK_BYDEFAULT, true);
+        return pref.getBoolean(ENABLE_TALK_BYDEFAULT, false);
     }
 
     public static void setEnableTalk(Context context, boolean enable) {
@@ -186,20 +161,6 @@ public class PreferenceUtils {
                 .getDefaultSharedPreferences(context);
         Editor prefEditor = pref.edit();
         prefEditor.putInt(KEY_FONT_SIZE, size);
-        prefEditor.commit();
-    }
-    
-    public static int getFontColor(Context context) {
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(context);
-        return pref.getInt(KEY_QUOTE_FONT_COLOR, 0);
-    }
-
-    public static void setFontColor(Context context, int color) {
-        SharedPreferences pref = PreferenceManager
-                .getDefaultSharedPreferences(context);
-        Editor prefEditor = pref.edit();
-        prefEditor.putInt(KEY_QUOTE_FONT_COLOR, color);
         prefEditor.commit();
     }
     

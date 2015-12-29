@@ -25,7 +25,6 @@ public class SettingsFragment extends DialogFragment implements
     private int progress;
     private TextView fontSizeTV = null;
     private TextView fontSizeTitleTV = null;
-    private TextView day_night_title = null;
     private CheckBox readSlokaCB = null;
     private CheckBox showSlokaCB = null;
     private CheckBox enableSpeakCB = null;
@@ -69,20 +68,6 @@ public class SettingsFragment extends DialogFragment implements
         fontSizeTitleTV = (TextView) view.findViewById(R.id.fontSizeTitleTV);
         fontSizeTV.setText(String.valueOf(PreferenceUtils
                 .getFontSize(getActivity())));
-        day_night_title = (TextView) view.findViewById(R.id.day_night_title);
-        day_night_title.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                PreferenceUtils.setReadMode(getActivity(),
-                        !PreferenceUtils.getDayMode(getActivity()));
-                setReadModeImg();
-                setStyle(STYLE_NORMAL, getThemeId());
-                settingsChangeListener
-                        .onSettingsChanged(Constants.SettingsItem.READ_MODE);
-            }
-        });
-        setReadModeImg();
         seekBar.setMax(Constants.MAX_FONT_SIZE - Constants.MIN_FONT_SIZE);
         seekBar.setProgress((progress -Constants.MIN_FONT_SIZE)/SEEKBAR_STEP );
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -126,13 +111,6 @@ public class SettingsFragment extends DialogFragment implements
         return dialog;
     }
 
-    private void setReadModeImg() {
-        if (day_night_title != null) {
-            boolean isDay = PreferenceUtils.getDayMode(getActivity());
-            int id = isDay ? R.drawable.day_mode : R.drawable.night_mode;
-            day_night_title.setCompoundDrawablesWithIntrinsicBounds(0, 0, id, 0);
-        }
-    }
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -157,12 +135,9 @@ public class SettingsFragment extends DialogFragment implements
         int colorId = PreferenceUtils.getDayMode(context) ? R.color.text_black : R.color.text_white;
         fontSizeTitleTV.setTextColor(context.getResources().getColor(colorId));
         fontSizeTV.setTextColor(context.getResources().getColor(colorId));
-        day_night_title.setTextColor(context.getResources().getColor(colorId));
         readSlokaCB.setTextColor(context.getResources().getColor(colorId));
         showSlokaCB.setTextColor(context.getResources().getColor(colorId));
         enableSpeakCB.setTextColor(context.getResources().getColor(colorId));
-        
-        
     }
     
 }

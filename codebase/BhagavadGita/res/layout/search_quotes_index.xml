@@ -2,9 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
     android:orientation="vertical"
-    android:id="@+id/backgroundLL" >
+    android:id="@+id/backgroundLL">
 
     <SearchView
         android:id="@+id/searchViewFrag"
@@ -14,30 +13,18 @@
         android:queryHint="@string/search_query_hint" >
     </SearchView>
 
-    <TextView
-        android:id="@+id/fqi_header_name"
-        android:layout_width="match_parent"
-        android:layout_height="26.0dip"
-        android:gravity="center"
-        android:paddingTop="1.0dip"
-        android:shadowColor="#ff111111"
-        android:shadowDx="1.0"
-        android:shadowDy="1.0"
-        android:shadowRadius="1.0"
-        android:textColor="#ffffffff"
-        android:textStyle="bold"
-        android:visibility="gone" />
-
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_background" >
 
         <ListView
             android:id="@+id/fqi_ListView"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:divider="#ff771e1b"
-            android:dividerHeight="1.0px" />
+            android:fadingEdgeLength="0dp"
+            android:layout_marginBottom="20dp" />
 
         <TextView
             android:id="@+id/empty"

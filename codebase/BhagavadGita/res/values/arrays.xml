@@ -14,7 +14,7 @@
     <array name="menu_drawer_icons">
         <item>@drawable/ic_continue_reading</item>
         <item>@drawable/ic_chapter</item>
-        <item>@drawable/ic_favorite</item>
+        <item>@drawable/ic_fav</item>
         <item>@drawable/ic_search</item>
         <item>@drawable/ic_settings</item>
         <item>@drawable/ic_qod</item>

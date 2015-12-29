@@ -2,7 +2,7 @@
 <resources>
 
     <color name="semi_transparent">#bb000000</color>
-    <color name="grey">#ff7a7a7a</color>
+    <color name="grey">#888888</color>
     <color name="white">#ffffffff</color>
     <color name="text_white">#ffffff</color>
     <color name="text_black">#000000</color>
@@ -11,12 +11,16 @@
     <color name="orange">#FF6600</color>
     <color name="darkgray">#CCCCCC</color>
     <color name="darkestgray">#606060</color>
-    <color name="light_grey">#ccccccdd</color>
     <color name="list_item_title">#fff</color>
-    <color name="list_background">#303030</color>
+    <color name="list_background">#EF5320</color>
     <color name="list_background_pressed">#992416</color>
     <color name="list_divider">#272727</color>
     <color name="section_header">#879AA6</color>
     <color name="settings_bg">#879AA6</color>
+    <color name="background">#E17B26</color>
+    <color name="bgStartColor">#DC7529</color>
+    <color name="bgEndColor">#B73A2F</color>
+    <color name="transparent">#ffffffff</color>
+    <color name="menu_drawer_bg">#B73A2F</color>
 
 </resources>

@@ -2,8 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/text_bg"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:id="@+id/quote_container">"
 
     <TextView
         android:id="@+id/qi_content"
@@ -19,7 +19,7 @@
         android:paddingLeft="4.0dip"
         android:paddingRight="4.0dip"
         android:paddingTop="10.0dip"
-        android:textColor="#000000"
+        android:textColor="@color/grey"
         android:textStyle="italic"
         android:typeface="serif" />
 
@@ -29,7 +29,7 @@
         android:layout_height="36.0dip"
         android:layout_alignParentRight="true"
         android:layout_marginTop="8.0dip"
-        android:button="@drawable/state_list_item_star"
+        android:button="@drawable/ic_favorite"
         android:focusable="false" />
 
 </RelativeLayout>

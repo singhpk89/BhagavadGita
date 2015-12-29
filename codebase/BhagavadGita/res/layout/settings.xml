@@ -34,14 +34,6 @@
                 android:thumb="@drawable/scrubber_control" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/day_night_title"
-            style="@style/settings"
-            android:drawableRight="@drawable/day_mode"
-            android:gravity="center_vertical"
-            android:padding="4.0dip"
-            android:text="@string/day_night_settings" />
-
         <CheckBox
             android:id="@+id/showSlokaCB"
             style="@style/settings"
