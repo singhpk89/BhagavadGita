@@ -1,13 +1,16 @@
 package com.sunilsahoo.bhagavadgita.view;
 
-import java.util.Locale;
-
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,12 +23,13 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sunilsahoo.bhagavadgita.GitaFragment;
+import com.sunilsahoo.bhagavadgita.OnSettingsChangeListener;
 import com.sunilsahoo.bhagavadgita.R;
 import com.sunilsahoo.bhagavadgita.beans.Quote;
 import com.sunilsahoo.bhagavadgita.db.GitaDBOperation;
 import com.sunilsahoo.bhagavadgita.db.PreferenceUtils;
 import com.sunilsahoo.bhagavadgita.utils.Constants;
+import com.sunilsahoo.bhagavadgita.utils.Constants.SettingsItem;
 import com.sunilsahoo.bhagavadgita.utils.Log;
 import com.sunilsahoo.bhagavadgita.utils.Utility;
 
@@ -33,7 +37,8 @@ import com.sunilsahoo.bhagavadgita.utils.Utility;
  * @author sunilsahoo
  * 
  */
-public class QuoteBodyFragment extends GitaFragment implements OnClickListener, OnLongClickListener {
+@SuppressLint("NewApi")
+public class QuoteBodyFragment extends Fragment implements OnClickListener, OnLongClickListener{
 
     protected static final String TAG = "QuoteBodyFragment";
     private TextView tv_body;
@@ -45,13 +50,24 @@ public class QuoteBodyFragment extends GitaFragment implements OnClickListener, 
     private ScrollView mScrollView;
     private RelativeLayout parentView;
     private ImageView playPause;
-    private boolean mIsManual = false;
-    private static final int STOP_TALK = 2;
-    private static final int START_TALK = 1;
-    private TextToSpeech ttobj = null;
-
     private View rootView;
     private String lastquoteOfChapter = "";
+    private OnSettingsChangeListener settingsChangeListener = null;
+    
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the NoticeDialogListener so we can send events to the
+            // host
+            settingsChangeListener = (OnSettingsChangeListener) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement NoticeDialogListener");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -100,14 +116,6 @@ public class QuoteBodyFragment extends GitaFragment implements OnClickListener, 
         updateFontSize();        
     }
 
-    @Override
-    public void onSettingsChanged(int itemType) {
-        switch (itemType) {
-        case Constants.SettingsItem.ENABLE_SPEAK:
-            processAutoTalk(false);
-            break;
-        }
-    }
 
     private void updateSlokaVisibility() {
         int visibility = PreferenceUtils.getShowSloka(getActivity())
@@ -150,162 +158,72 @@ public class QuoteBodyFragment extends GitaFragment implements OnClickListener, 
     @Override
     public void onPause() {
         super.onPause();
-        cancelTalk();
+        settingsChangeListener.onSettingsChanged(SettingsItem.PAUSE);
+        unregisterReceiver();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        cancelTalk();
+        settingsChangeListener.onSettingsChanged(SettingsItem.PAUSE);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        processAutoTalk(false);
+        registerReceiver();
+        if(PreferenceUtils.enableTalk(getActivity())){
+        settingsChangeListener.onSettingsChanged(SettingsItem.PLAY);
+        }
+//        processAutoTalk(false);
+//        settingsChangeListener.onSettingsChanged(SettingsItem.PLAY);
     }
 
-    private void stopTalkResource(boolean setStatus) {
-        try {
-            if (ttobj != null) {
-                Log.d(TAG, "stop talk");
-                ttobj.stop();
-                ttobj.shutdown();
-                ttobj = null;
-            }
-        } catch (Exception ex) {
 
-        }
-        playPause.setSelected(!setStatus);
-    }
-
-    private void initializeTalkResource(boolean manual) {
-        try {
-            // Log.d(TAG, "initialize talk");
-            boolean startSpeak = manual
-                    || PreferenceUtils.enableTalk(getActivity());
-            stopTalkResource(false);
-            if (!startSpeak) {
-                return;
-            }
-            ttobj = new TextToSpeech(getActivity(),
-                    new TextToSpeech.OnInitListener() {
-
-                        @Override
-                        public void onInit(int status) {
-                            // Log.d(TAG, "start talk");
-                            String speakingText = getSpeakingText();
-                            if ((status != TextToSpeech.ERROR && !ttobj
-                                    .isSpeaking()) && (speakingText != null)) {
-                                Log.d(TAG, "talking");
-                                ttobj.setSpeechRate(0.85f);
-                                ttobj.setLanguage(Locale.UK);
-                                ttobj.speak(speakingText,
-                                        TextToSpeech.QUEUE_FLUSH, null);
-                            }
-                        }
-                    });
-        } catch (Exception ex) {
-            Log.e(TAG, "Exception :" + ex);
-        }
-    }
-
-    private String getSpeakingText() {
-        if (quote == null) {
-            return null;
-        }
-        return PreferenceUtils.getReadSloka(getActivity()) ? getResources()
-                .getString(R.string.sloka)
-                + quote.getSlokaEnglish()
-                + getResources().getString(R.string.translation)
-                + quote.getBody() : quote.getBody();
-    }
-
-    private final Handler timeoutHandler = new Handler() {
-        public void handleMessage(Message msg) {
-
-            switch (msg.what) {
-            case STOP_TALK:
-                stopTalkResource(true);
-                break;
-
-            case START_TALK:
-                initializeTalkResource(mIsManual);
-                break;
-            }
-        }
-    };
-
-    Runnable swipeImageAnimRunnable = new Runnable() {
-        public void run() {
-            timeoutHandler.sendEmptyMessage(START_TALK);
-        }
-    };
-
-    private void processAutoTalk(boolean startNow){
-        boolean isAutoTalkOn = PreferenceUtils.enableTalk(getActivity());
-        Log.d(TAG, "isAutoTalkOn :"+isAutoTalkOn);
-        if (isAutoTalkOn) {
-            startTalk(startNow);
-        } else {
-            cancelTalk();
-        }
-    }
-    private void startTalk(boolean startNow) {
-        try {
-            Log.d(TAG, "inside startTalk : " + mIsManual);            
-            mIsManual = startNow;
-            cancelTalk();
-            playPause.setSelected(true);
-            if (startNow) {
-                timeoutHandler.post(swipeImageAnimRunnable);
-            } else {
-                timeoutHandler.postDelayed(swipeImageAnimRunnable,
-                        Constants.ANIM_START_AT_DELAY);
-            }
-
-        } catch (Exception ex) {
-            Log.w(TAG, "Problem in scheduling talk :" + ex);
-            playPause.setSelected(false);
-        }
-    }
-
-    private void cancelTalk() {
-        try {
-            timeoutHandler.sendEmptyMessage(STOP_TALK);
-            timeoutHandler.removeCallbacks(swipeImageAnimRunnable);
-        } catch (Exception ex) {
-            Log.w(TAG, "Problem in canceling talk :" + ex);
-        }
-    }
-
-    /*private String getCopyText() {
-        if (quote == null) {
-            return null;
-        }
-        String chapterNoText = getString(R.string.app_name)
-                + " - "
-                + ((quote.getChapterNo() > 0) ? "Chapter "
-                        + quote.getChapterNo() + "(Verse " + quote.getTextId()
-                        + ")" : Constants.SPINNER_CHAPTER_INTRODUCTION);
-        return (PreferenceUtils.getShowSloka(getActivity())
-                && (quote.getChapterNo() > 0) ? chapterNoText + " : "
-                + quote.getSlokaSanskrit() + "\n" + quote.getBody()
-                : chapterNoText + " : " + quote.getBody())
-                + "\n" + getResources().getString(R.string.share_bottom);
-    }*/
 
     @Override
     public void onClick(View v) {
+        Log.d(TAG, "click :"+playPause+" "+playPause.isSelected());
         if(v == playPause){
             if(playPause.isSelected()){
-                cancelTalk();
+                settingsChangeListener.onSettingsChanged(SettingsItem.PAUSE);
             }else{
-                startTalk(true);
+                settingsChangeListener.onSettingsChanged(SettingsItem.PLAY);
+//                startTalk(true);
             }
         }
         
     }
+    
+    /*public void updatePlayPauseView(int state){
+        Log.d(TAG, state+" inside updatePlayPauseView : "+(state == SettingsItem.PLAY)+" playPause :"+playPause);
+        if(playPause != null)
+            playPause.setImageResource(R.drawable.ic_launcher);
+    }*/
+    
+    private void registerReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constants.ACTION_SHOW_PAUSE);
+        filter.addAction(Constants.ACTION_SHOW_PLAY);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                mMessageReceiver, filter);
+    }
+    
+    private void unregisterReceiver(){
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(
+                mMessageReceiver);
+    }
+    
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getAction();
+//            Log.d(TAG, message.equals(Constants.ACTION_SHOW_PAUSE)+" Got message: " + message);
+            playPause.setSelected(message.equals(Constants.ACTION_SHOW_PAUSE));
+        }
+    };
+    
 
     @Override
     public boolean onLongClick(View v) {
@@ -326,8 +244,7 @@ public class QuoteBodyFragment extends GitaFragment implements OnClickListener, 
         
         return false;
     }
-    
-    
+
     private void setClipboard(Context context, String text, String msgHeader) {
         android.content.ClipboardManager clipboard = (android.content.ClipboardManager) context
                 .getSystemService(Context.CLIPBOARD_SERVICE);

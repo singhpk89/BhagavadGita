@@ -46,6 +46,8 @@ public class Constants {
     public static final int MIN_FONT_SIZE = 10;
     //splash screen fo 1 sec
     public static final long SPLASH_SCREEN_DURATION = 1*1000;
+    public static final String ACTION_SHOW_PLAY = "show_play";
+    public static final String ACTION_SHOW_PAUSE = "show_pause";
     
     
     public interface SlidingMenuItems{
@@ -65,6 +67,8 @@ public class Constants {
         int SHOW_SLOKA = 2;
         int READ_SLOKA = 3;
         int ENABLE_SPEAK = 4;
+        int PLAY = 102;
+        int PAUSE = 103;
     }
     
     public interface FragmentCallbackAction{

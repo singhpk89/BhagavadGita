@@ -81,6 +81,7 @@ public class QuotesListFragment extends GitaFragment implements
         mContext = getActivity();
         fragmentType = getArguments().getString(Constants.FRAG_TYPE);
         lv = (ListView) rootView.findViewById(R.id.fqi_ListView);
+        lv.setFastScrollEnabled(true);
 //        mChapterQuoteHeader = rootView.findViewById(R.id.chapter_quote_header);
         if (Constants.FRAG_FAVOURITE.equals(fragmentType)) {
             lv.setDividerHeight(0);
@@ -91,7 +92,7 @@ public class QuotesListFragment extends GitaFragment implements
         }
         ((BhagavadGitaMainActivity)mContext).setVisibilityOfMenuOptions(View.INVISIBLE);
 
-        
+
 
         tv_empty = (TextView) rootView.findViewById(R.id.empty);
 

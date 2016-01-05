@@ -28,7 +28,8 @@
 
         <TextView
             android:id="@+id/empty"
-            style="@style/EmptyListText" />
+            style="@style/EmptyListText"
+            android:text="@string/no_search" />
     </RelativeLayout>
 
 </LinearLayout>

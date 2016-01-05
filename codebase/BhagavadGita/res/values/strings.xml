@@ -25,6 +25,7 @@
     <string name="translation">Translation</string>
     <string name="copy_title">Copied Verses</string>
     <string name="no_favourites">No Favorite Verses</string>
+    <string name="no_search">No Search Results Found</string>
     <string name="particular_chapter">Chapter %1$s</string>
     <string name="favourites_title">Favourite %1$s/%2$s</string>
     <string name="search_title">Match %1$s/%2$s</string>

@@ -1,9 +1,20 @@
 package com.sunilsahoo.bhagavadgita.view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
+import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
+import android.speech.tts.UtteranceProgressListener;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
@@ -32,7 +43,7 @@ import com.sunilsahoo.bhagavadgita.utils.Utility;
  * 
  */
 public class QuoteDetailFragment extends GitaFragment implements OnClickListener,
-        OnPageChangeListener {
+        OnPageChangeListener, OnInitListener {
 
     protected static final String TAG = "QuoteView";
 
@@ -58,13 +69,26 @@ public class QuoteDetailFragment extends GitaFragment implements OnClickListener
     private OnFragmentResult onFragmentClosedListener = null;
     private boolean isFavChanged = false;
     private String lastquoteOfChapter = "";
-
+    private boolean mIsManual = false;
+    private static final int STOP_TALK = 2;
+    private static final int START_TALK = 1;
+    private static TextToSpeech ttobj = null;
+    private HashMap<String, String> params = new HashMap<String, String>();
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.quote_preview, container, false);
         initView(rootView);
         return rootView;
+    }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        if(ttobj == null){
+        ttobj = new TextToSpeech(getActivity(), this);
+        }
+        super.onCreate(savedInstanceState);
     }
 
     @SuppressWarnings("unchecked")
@@ -184,46 +208,6 @@ public class QuoteDetailFragment extends GitaFragment implements OnClickListener
         }
     }
 
-    /*@Override
-    public void onMenuDrawerItemSelected(int position) {
-        if (getSelectedQuote() == null) {
-            Log.w(TAG, "Quote is null");
-            return;
-        }
-        switch (position) {
-        case 0:
-            // Share
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_TEXT, getCopyText());
-            Intent intent = Intent.createChooser(share, getActivity()
-                    .getResources().getString(R.string.share_title));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            getActivity().startActivity(intent);
-            break;
-        case 1:
-            // Copy
-            setClipboard(getActivity(), getCopyText());
-            break;
-        case 2:
-            // add to favorite
-            isFavChanged = true;
-            updateFavourite(getSelectedQuote());
-            break;
-        case 3:
-            // qod
-            setQOD();
-            break;
-        case 4:
-            // read
-            break;
-
-        default:
-            break;
-        }
-
-    }*/
-
     @Override
     public void onSettingsChanged(int itemType) {
         Log.d(TAG, "onSettingsChanged :" + itemType);
@@ -238,6 +222,13 @@ public class QuoteDetailFragment extends GitaFragment implements OnClickListener
         case Constants.SettingsItem.SHOW_SLOKA:
             mPageAdapter.notifyDataSetChanged();
         case Constants.SettingsItem.ENABLE_SPEAK:
+            processAutoTalk(false);
+            break;
+        case Constants.SettingsItem.PLAY:
+            startTalk(true);
+            break;
+        case Constants.SettingsItem.PAUSE:
+            cancelTalk();
             break;
         default:
             Log.d(TAG, "item Type unknown");
@@ -343,28 +334,6 @@ public class QuoteDetailFragment extends GitaFragment implements OnClickListener
                 + " selectedPosition : " + arg0 + " fragmentType :"
                 + fragmentType + " size :" + quoteList.size());
         selectedPosition = arg0;
-
-        if (Constants.FRAG_QUOTE_DETAIL.equals(fragmentType)
-                || Constants.FRAG_CHAPTER_QUOTE_DETAIL.equals(fragmentType)) {
-            // int prevSeleChapter = PreferenceUtils
-            // .getSelectedChapter(getActivity());
-            // // if (fromScroll || (prevSeleChapter != Constants.EOF)) {
-            // PreferenceUtils.setSelectedChapter(getActivity(),
-            // getSelectedQuote().getChapterNo());
-            // // }
-            // chapterQuoteSpinnerView.setChapterSelection(PreferenceUtils
-            // .getSelectedChapter(getActivity()));
-            // if (prevSeleChapter != getSelectedQuote().getChapterNo()) {
-            // chapterQuoteSpinnerView.updateQuoteSpinner();
-            // }
-            // chapterQuoteSpinnerView.setQuoteSelection(getSelectedQuote()
-            // .getTextId());
-        } else {
-            // chapterQuoteSpinnerView.setChapterSelection(getSelectedQuote()
-            // .getChapterNo());
-            // chapterQuoteSpinnerView.setQuoteSelection(getSelectedQuote()
-            // .getTextId());
-        }
         updateTitle();
         updateState();
         if (Constants.FRAG_QUOTE_DETAIL.equals(fragmentType)) {
@@ -432,6 +401,10 @@ public class QuoteDetailFragment extends GitaFragment implements OnClickListener
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(ttobj != null){
+            ttobj.shutdown();
+            ttobj = null;
+        }
         if (onFragmentClosedListener != null) {
             Bundle b = new Bundle();
             if (Constants.FRAG_CHAPTER_QUOTE_DETAIL.equals(fragmentType)) {
@@ -471,7 +444,11 @@ public class QuoteDetailFragment extends GitaFragment implements OnClickListener
         } else if (Constants.FRAG_SEARCH_QUOTE_DETAIL.equals(fragmentType)) {
             title = String.format(
                     getResources().getString(R.string.search_title), selectedPosition+1, quoteList.size());
-        } else {
+        } else if(Constants.FRAG_QOD.equals(fragmentType)){
+            String[] navMenuTitles = getResources().getStringArray(
+                    R.array.menu_drawer_options);
+            title = navMenuTitles[Constants.SlidingMenuItems.QOD];
+        }else {
 
             title = getSelectedQuote().getChapterNo() == 0 ? Constants.SPINNER_CHAPTER_INTRODUCTION
                     : String.format(
@@ -482,5 +459,229 @@ public class QuoteDetailFragment extends GitaFragment implements OnClickListener
         }
         ((BhagavadGitaMainActivity) getActivity()).setActionBarTitle(title);
     }
+    
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        cancelTalk();
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        cancelTalk();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        processAutoTalk(false);
+    }
+
+    private void stopTalkResource(boolean setStatus) {
+        try {
+            if (ttobj != null) {
+                Log.d(TAG, "stop talk");
+                ttobj.stop();
+            }
+        } catch (Exception ex) {
+
+        }
+    }
+
+    private void initializeTalkResource(boolean manual) {
+        try {
+            // Log.d(TAG, "initialize talk");
+            boolean startSpeak = manual
+                    || PreferenceUtils.enableTalk(getActivity());
+            stopTalkResource(false);
+            if (!startSpeak) {
+                return;
+            }
+            speak(getSpeakingText());
+        } catch (Exception ex) {
+            Log.e(TAG, "Exception :" + ex);
+        }
+    }
+    
+    
+    protected void speak(String speakingText) {
+        if(params != null){
+            params.clear();
+        }
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,"test");
+//        params.put(TextToSpeech.Engine.KEY_PARAM_STREAM, speakingText);
+        ttobj.speak(speakingText,TextToSpeech.QUEUE_FLUSH,params);
+    }
+    
+    @SuppressLint("NewApi")
+    public void setTtsCompletionListener(TextToSpeech tts)
+    {
+        final QuoteDetailFragment callWithResult = this;
+        if (Build.VERSION.SDK_INT >= 15)
+        {
+            int listenerResult = tts.setOnUtteranceProgressListener(new UtteranceProgressListener()
+            {
+                @Override
+                public void onDone(String utteranceId)
+                {
+                    callWithResult.onDone(utteranceId);
+                }
+
+                @Override
+                public void onError(String utteranceId)
+                {
+                    callWithResult.onError(utteranceId);
+                }
+
+                @Override
+                public void onStart(String utteranceId)
+                {
+                    callWithResult.onStart(utteranceId);
+                }
+            });
+            if (listenerResult != TextToSpeech.SUCCESS)
+            {
+                Log.e(TAG, "failed to add utterance progress listener");
+            }
+        }
+        else
+        {
+            int listenerResult = tts.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener()
+            {
+                @Override
+                public void onUtteranceCompleted(String utteranceId)
+                {
+                    callWithResult.onDone(utteranceId);
+                }
+            });
+            if (listenerResult != TextToSpeech.SUCCESS)
+            {
+                Log.e(TAG, "failed to add utterance completed listener");
+            }
+        }
+    }
+
+    protected void onStart(String utteranceId) {
+        Log.d(TAG, "onStart()");
+        
+    }
+
+    protected void onError(String utteranceId) {
+        Log.d(TAG, "onError()");
+        cancelTalk();
+        
+    }
+
+    protected void onDone(String utteranceId) {
+        Log.d(TAG, "onDone()");
+        cancelTalk();
+    }
+
+    private String getSpeakingText() {
+        if (getSelectedQuote() == null) {
+            return null;
+        }
+        return PreferenceUtils.getReadSloka(getActivity()) ? getResources()
+                .getString(R.string.sloka)
+                + getSelectedQuote().getSlokaEnglish()
+                + getResources().getString(R.string.translation)
+                + getSelectedQuote().getBody() : getSelectedQuote().getBody();
+    }
+
+    private final Handler timeoutHandler = new Handler() {
+        public void handleMessage(Message msg) {
+
+            switch (msg.what) {
+            case STOP_TALK:
+                stopTalkResource(true);
+                break;
+
+            case START_TALK:
+                initializeTalkResource(mIsManual);
+                break;
+            }
+        }
+    };
+
+    Runnable swipeImageAnimRunnable = new Runnable() {
+        public void run() {
+            timeoutHandler.sendEmptyMessage(START_TALK);
+        }
+    };
+
+    private void processAutoTalk(boolean startNow){
+        boolean isAutoTalkOn = PreferenceUtils.enableTalk(getActivity());
+        Log.d(TAG, "isAutoTalkOn :"+isAutoTalkOn);
+        if (isAutoTalkOn) {
+            startTalk(startNow);
+        } else {
+            cancelTalk();
+        }
+    }
+    private void startTalk(boolean startNow) {
+        try {
+            Log.d(TAG, "inside startTalk : " + mIsManual);            
+            mIsManual = startNow;
+            cancelTalk(false);
+            updatePlayPauseView(Constants.ACTION_SHOW_PAUSE);
+//            if(settingsChangeListener != null)
+//                settingsChangeListener.onSettingsChanged(SettingsItem.SHOW_PLAY);
+            if (startNow) {
+                timeoutHandler.post(swipeImageAnimRunnable);
+            } else {
+                timeoutHandler.postDelayed(swipeImageAnimRunnable,
+                        Constants.ANIM_START_AT_DELAY);
+            }
+
+        } catch (Exception ex) {
+            Log.w(TAG, "Problem in scheduling talk :" + ex);
+//            playPause.setSelected(false);
+            updatePlayPauseView(Constants.ACTION_SHOW_PLAY);
+//            if(settingsChangeListener != null)
+//                settingsChangeListener.onSettingsChanged(SettingsItem.SHOW_PAUSE);
+        }
+    }
+    
+    private void cancelTalk() {
+        cancelTalk(true);
+    }
+
+    private void cancelTalk(boolean updateIcon) {
+        try {
+            timeoutHandler.sendEmptyMessage(STOP_TALK);
+            timeoutHandler.removeCallbacks(swipeImageAnimRunnable);
+            if(updateIcon){
+            updatePlayPauseView(Constants.ACTION_SHOW_PLAY);
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "Problem in canceling talk :" + ex);
+        }
+    }
+
+
+
+    @Override
+    public void onInit(int status) {
+        setTtsCompletionListener(ttobj);
+        if ((status != TextToSpeech.ERROR && !ttobj
+                .isSpeaking())) {
+            Log.d(TAG, "talking");
+            ttobj.setSpeechRate(0.75f);
+            ttobj.setLanguage(Locale.UK);
+        }
+    }
+    
+    
+    
+    public void updatePlayPauseView(String action){
+        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast( new Intent(action));
+        /*QuoteBodyFragment fragment = findFragmentByPosition(position);
+        if(fragment != null){
+            fragment.updatePlayPauseView(state);
+        }*/
+        
+    }
+    
 }

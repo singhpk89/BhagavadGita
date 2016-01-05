@@ -75,7 +75,7 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
         searchView.setOnQueryTextListener(this);
         setSearchTextColor(getActivity());
         lv = (ListView) rootView.findViewById(R.id.fqi_ListView);
-
+        lv.setFastScrollEnabled(true);
         tv_empty = (TextView) rootView.findViewById(R.id.empty);
 
         listData = new ArrayList<Item>();
@@ -157,6 +157,9 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
             }
             
             if (adapter == null) {
+                if ((listData == null) || listData.isEmpty()) {
+                        updateEmptyTextView();
+                }
                 adapter = new QuoteAdapter(mContext, fragmentType, listData);
                 adapter.setOnClickCheckBoxListener(new OnClickCheckBoxListener() {
                     @Override
@@ -313,6 +316,14 @@ public class SearchViewFragment extends GitaFragment implements OnQueryTextListe
             dialogLoading = null;
         }
         super.onDestroyView();
+    }
+    
+    private void updateEmptyTextView() {
+        if (listData.isEmpty()) {
+            tv_empty.setVisibility(View.VISIBLE);
+        } else {
+            tv_empty.setVisibility(View.GONE);
+        }
     }
 
 }
